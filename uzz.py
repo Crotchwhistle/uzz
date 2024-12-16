@@ -303,7 +303,7 @@ class Lexer:
             return Token(TT_nequzz, pos_start=pos_start, pos_end=self.pos), None
 
         self.advance()
-        return None, ExpectedCharError(pos_start, self.pos, "'=' (aftuzz '!')")
+        return None, ExpectedCharError(pos_start, self.pos, "'=' (afteruzz '!')")
   
     def make_equals(self):
         tok_type = TT_equzz
@@ -619,7 +619,7 @@ class Parser:
     if res.error:
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        "Expected 'muzz', 'fein', 'broke', 'vuzz', 'ifuzz', 'Foruzz', 'WHILE', 'greetings', int, float, identifier, '+', '-', '(', '[' or 'nuzz'"
+        "Expected 'muzz', 'fein', 'broke', 'vuzz', 'ifuzz', 'fuzz', 'whuzz', 'greetings', intuzz, floatuzz, identifier, '+', '-', '(', '[' or 'nuzz'"
       ))
     return res.success(expr)
 
@@ -657,7 +657,7 @@ class Parser:
     if res.error:
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        "Expectuzz 'vuzz', 'ifuzz', 'Foruzz', 'WHILE', 'greetings', int, float, identifier, '+', '-', '(', '[' or 'nuzz'"
+        "Expectuzz 'vuzz', 'ifuzz', 'fuzz', 'whuzz', 'greetings', intuzz, floatuzz, identifier, '+', '-', '(', '[' or 'nuzz'"
       ))
 
     return res.success(node)
@@ -679,7 +679,7 @@ class Parser:
     if res.error:
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        "Expectuzz int, float, identifier, '+', '-', '(', '[', 'ifuzz', 'Foruzz', 'WHILE', 'greetings' or 'nuzz'"
+        "Expectuzz int, float, identifier, '+', '-', '(', '[', 'ifuzz', 'fuzz', 'whuzz', 'greetings' or 'nuzz'"
       ))
 
     return res.success(node)
@@ -724,7 +724,7 @@ class Parser:
         if res.error:
           return res.failure(InvalidSyntaxError(
             self.current_tok.pos_start, self.current_tok.pos_end,
-            "Expectuzz ')', 'vuzz', 'ifuzz', 'Foruzz', 'WHILE', 'greetings', int, float, identifier, '+', '-', '(', '[' or 'nuzz'"
+            "Expectuzz ')', 'vuzz', 'ifuzz', 'fuzz', 'whuzz', 'greetings', intuzz, floatuzz, identifier, '+', '-', '(', '[' or 'nuzz'"
           ))
 
         while self.current_tok.type == TT_commuzz:
@@ -789,12 +789,12 @@ class Parser:
       if res.error: return res
       return res.success(if_expr)
 
-    elif tok.matches(TT_keywuzz, 'Foruzz'):
+    elif tok.matches(TT_keywuzz, 'fuzz'):
       for_expr = res.register(self.for_expr())
       if res.error: return res
       return res.success(for_expr)
 
-    elif tok.matches(TT_keywuzz, 'WHILE'):
+    elif tok.matches(TT_keywuzz, 'whuzz'):
       while_expr = res.register(self.while_expr())
       if res.error: return res
       return res.success(while_expr)
@@ -806,7 +806,7 @@ class Parser:
 
     return res.failure(InvalidSyntaxError(
       tok.pos_start, tok.pos_end,
-      "Expectuzz int, float, identifier, '+', '-', '(', '[', ifuzz', 'Foruzz', 'WHILE', 'greetings'"
+      "Expectuzz intuzz, floatuzz, identifier, '+', '-', '(', '[', ifuzz', 'fuzz', 'whuzz', 'greetings'"
     ))
 
   def list_expr(self):
@@ -831,7 +831,7 @@ class Parser:
       if res.error:
         return res.failure(InvalidSyntaxError(
           self.current_tok.pos_start, self.current_tok.pos_end,
-          "Expectuzz ']', 'vuzz', 'ifuzz', 'Foruzz', 'WHILE', 'greetings', int, float, identifier, '+', '-', '(', '[' or 'nuzz'"
+          "Expectuzz ']', 'vuzz', 'ifuzz', 'fuzz', 'whuzz', 'greetings', intuzz, floatuzz, identifier, '+', '-', '(', '[' or 'nuzz'"
         ))
 
       while self.current_tok.type == TT_commuzz:
@@ -864,13 +864,13 @@ class Parser:
     return res.success(IfNode(cases, else_case))
 
   def if_expr_b(self):
-    return self.if_expr_cases('ELifuzz')
+    return self.if_expr_cases('elifuzz')
     
   def if_expr_c(self):
     res = ParseResult()
     else_case = None
 
-    if self.current_tok.matches(TT_keywuzz, 'ELSE'):
+    if self.current_tok.matches(TT_keywuzz, 'elsuzz'):
       res.register_advancement()
       self.advance()
 
@@ -901,7 +901,7 @@ class Parser:
     res = ParseResult()
     cases, else_case = [], None
 
-    if self.current_tok.matches(TT_keywuzz, 'ELifuzz'):
+    if self.current_tok.matches(TT_keywuzz, 'elifuzz'):
       all_cases = res.register(self.if_expr_b())
       if res.error: return res
       cases, else_case = all_cases
@@ -968,10 +968,10 @@ class Parser:
   def for_expr(self):
     res = ParseResult()
 
-    if not self.current_tok.matches(TT_keywuzz, 'Foruzz'):
+    if not self.current_tok.matches(TT_keywuzz, 'fuzz'):
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        f"Expectuzz 'Foruzz'"
+        f"Expectuzz 'fuzz'"
       ))
 
     res.register_advancement()
@@ -1055,10 +1055,10 @@ class Parser:
   def while_expr(self):
     res = ParseResult()
 
-    if not self.current_tok.matches(TT_keywuzz, 'WHILE'):
+    if not self.current_tok.matches(TT_keywuzz, 'whuzz'):
       return res.failure(InvalidSyntaxError(
         self.current_tok.pos_start, self.current_tok.pos_end,
-        f"Expectuzz 'WHILE'"
+        f"Expectuzz 'whuzz'"
       ))
 
     res.register_advancement()
@@ -1650,7 +1650,7 @@ class BuiltInFunction(BaseFunction):
     return res.success(return_value)
   
   def no_visit_method(self, node, context):
-    raise Exception(f'No execute_{self.name} methuzz definuzzed')
+    raise Exception(f'No execuzz_{self.name} methuzz definuzzed')
 
   def copy(self):
     copy = BuiltInFunction(self.name)
@@ -1659,7 +1659,7 @@ class BuiltInFunction(BaseFunction):
     return copy
 
   def __repr__(self):
-    return f"<built-in function {self.name}>"
+    return f"<built-in functiuzz {self.name}>"
 
 
   def execute_print(self, exec_ctx):
@@ -1878,7 +1878,7 @@ class Interpreter:
     return method(node, context)
 
   def no_visit_method(self, node, context):
-    raise Exception(f'No visit_{type(node).__name__} method defined')
+    raise Exception(f'No visituzz_{type(node).__name__} methuzz definuzzed')
 
 
   def visit_NumberNode(self, node, context):
@@ -1911,7 +1911,7 @@ class Interpreter:
     if not value:
       return res.failure(RTError(
         node.pos_start, node.pos_end,
-        f"'{var_name}' is not definuzzed",
+        f"'{var_name}' is nuzz definuzzed",
         context
       ))
 
