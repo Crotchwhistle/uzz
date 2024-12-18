@@ -3,6 +3,7 @@ from struzz_wuzz_arruzz import *
 import string
 import os
 import math
+import random
 
 #* constants
 
@@ -1826,6 +1827,27 @@ class BuiltInFunction(BaseFunction):
     return RTResult().success(Number.null)
   execute_run.arg_names = ["fn"]
 
+  def execute_dafuq(self, exec_ctx):
+    help_text = "hey bruzz go look at the git page:\nhttps://github.com/Crotchwhistle/uzz"
+    print(help_text)
+    return RTResult().success(Number.null)
+  execute_dafuq.arg_names = []
+
+  def execute_green_fn(self, exec_ctx):
+    start = exec_ctx.symbol_table.get("start")
+    end = exec_ctx.symbol_table.get("end")
+
+    if not isinstance(start, Number) or not isinstance(end, Number):
+        return RTResult().failure(RTError(
+            self.pos_start, self.pos_end,
+            "Both arguments must be numbers",
+            exec_ctx
+        ))
+
+    result = random.randint(start.value, end.value)
+    return RTResult().success(Number(result))
+  execute_green_fn.arg_names = ["start", "end"]
+
 BuiltInFunction.print = BuiltInFunction("print")
 BuiltInFunction.print_ret = BuiltInFunction("print_ret")
 BuiltInFunction.input = BuiltInFunction("input")
@@ -1840,6 +1862,8 @@ BuiltInFunction.pop = BuiltInFunction("pop")
 BuiltInFunction.extend = BuiltInFunction("extend")
 BuiltInFunction.len = BuiltInFunction("len")
 BuiltInFunction.run = BuiltInFunction("run")
+BuiltInFunction.dafuq = BuiltInFunction("dafuq")
+BuiltInFunction.green_fn = BuiltInFunction("green_fn")
 
 #* context
 
@@ -2141,6 +2165,8 @@ global_symbol_table.set("fanum", BuiltInFunction.pop)
 global_symbol_table.set("dragging", BuiltInFunction.extend)
 global_symbol_table.set("count", BuiltInFunction.len)
 global_symbol_table.set("bruzz", BuiltInFunction.run)
+global_symbol_table.set("dafuq", BuiltInFunction.dafuq)
+global_symbol_table.set("green_fn", BuiltInFunction.green_fn)
 
 def run(fn, text):
   # Generate tokens
