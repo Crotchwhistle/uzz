@@ -1822,8 +1822,46 @@ class BuiltInFunction(BaseFunction):
   execute_run.arg_names = ["fn"]
 
   def execute_dafuq(self, exec_ctx):
-    help_text = "hey bruzz go look at the git page:\nhttps://github.com/Crotchwhistle/uzz"
-    print(help_text)
+    built_in_functions = [
+        "low_taper()",
+        "hawk()",
+        "hawk_tuah()",
+        "fade()",
+        "band()",
+        "word()",
+        "fact()",
+        "goon()",
+        "nettspend()",
+        "fanum()",
+        "massive()",
+        "count()",
+        "bruzz()",
+        "dafuq()",
+        "green_fn()"
+    ]
+    print("\n".join(built_in_functions))
+    function_name = input("type the name of a function for help bruzz: ").strip()
+
+    descriptions = {
+        "low_taper()": "Prints the (value) to the terminal.",
+        "hawk()": "Reads input from the terminal.",
+        "hawk_tuah()": "Reads an integer input from the terminal.",
+        "fade()": "Clears the terminal screen.",
+        "band()": "Checks if the (value) is a number.",
+        "word()": "Checks if the (value) is a string.",
+        "fact()": "Checks if the (value) is a list.",
+        "goon()": "Checks if the (value) is a function.",
+        "nettspend()": "Appends (value) to the (list).",
+        "fanum()": "Removes and returns the element at (index) from the (list).",
+        "massive()": "Extends (listA) with elements from (listB).",
+        "count()": "Returns the length of the (list).",
+        "bruzz()": "Runs a script from a file.",
+        "dafuq()": "Displays help information for built-in functions.",
+        "green_fn()": "Generates a random integer between (start) and (end)."
+    }
+
+    description = descriptions.get(function_name, "Function not found.")
+    print(description)
     return RTResult().success(Number.null)
   execute_dafuq.arg_names = []
 

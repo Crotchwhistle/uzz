@@ -59,13 +59,13 @@ I think it's funny to code in brainrot, this is an [esoteric programming languag
 The help() function.
 Returns a link to the GitHub page.
 
-### low(value)
+### low_taper(value)
 
 Prints the (value) to the terminal.
 
 Example:
 ```
-low("Hello, world!");  # Prints "Hello, world!"
+low_taper("Hello, world!");  # Prints "Hello, world!"
 ```
 
 ### fade()
