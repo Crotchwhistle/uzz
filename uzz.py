@@ -1661,16 +1661,10 @@ class BuiltInFunction(BaseFunction):
 
   def __repr__(self):
     return f"<built-in functiuzz {self.name}>"
-
-
-  def execute_print(self, exec_ctx):
-    print(str(exec_ctx.symbol_table.get('value')))
-    return RTResult().success(Number.null)
-  execute_print.arg_names = ['value']
   
-  def execute_print_ret(self, exec_ctx):
+  def execute_print(self, exec_ctx):
     return RTResult().success(String(str(exec_ctx.symbol_table.get('value'))))
-  execute_print_ret.arg_names = ['value']
+  execute_print.arg_names = ['value']
   
   def execute_input(self, exec_ctx):
     text = input()
@@ -1776,7 +1770,7 @@ class BuiltInFunction(BaseFunction):
       ))
 
     listA.elements.extend(listB.elements)
-    return RTResult().success(Number.null)
+    return RTResult().success(listA)
   execute_extend.arg_names = ["listA", "listB"]
 
   def execute_len(self, exec_ctx):
@@ -1840,7 +1834,7 @@ class BuiltInFunction(BaseFunction):
     if not isinstance(start, Number) or not isinstance(end, Number):
         return RTResult().failure(RTError(
             self.pos_start, self.pos_end,
-            "Both arguments must be numbers",
+            "Both arguzz muzzt be numbuzz",
             exec_ctx
         ))
 
@@ -1849,7 +1843,6 @@ class BuiltInFunction(BaseFunction):
   execute_green_fn.arg_names = ["start", "end"]
 
 BuiltInFunction.print = BuiltInFunction("print")
-BuiltInFunction.print_ret = BuiltInFunction("print_ret")
 BuiltInFunction.input = BuiltInFunction("input")
 BuiltInFunction.input_int = BuiltInFunction("input_int")
 BuiltInFunction.clear = BuiltInFunction("clear")
@@ -2151,8 +2144,7 @@ global_symbol_table.set("nulluzz", Number.null)
 global_symbol_table.set("faluzz", Number.false)
 global_symbol_table.set("truzz", Number.true)
 global_symbol_table.set("math_piuzz", Number.math_PI)
-global_symbol_table.set("low", BuiltInFunction.print)
-global_symbol_table.set("low_taper", BuiltInFunction.print_ret)
+global_symbol_table.set("low_taper", BuiltInFunction.print)
 global_symbol_table.set("hawk", BuiltInFunction.input)
 global_symbol_table.set("hawk_tuah", BuiltInFunction.input_int)
 global_symbol_table.set("fade", BuiltInFunction.clear)
@@ -2162,7 +2154,7 @@ global_symbol_table.set("fact", BuiltInFunction.is_list)
 global_symbol_table.set("goon", BuiltInFunction.is_function)
 global_symbol_table.set("nettspend", BuiltInFunction.append)
 global_symbol_table.set("fanum", BuiltInFunction.pop)
-global_symbol_table.set("dragging", BuiltInFunction.extend)
+global_symbol_table.set("massive", BuiltInFunction.extend)
 global_symbol_table.set("count", BuiltInFunction.len)
 global_symbol_table.set("bruzz", BuiltInFunction.run)
 global_symbol_table.set("dafuq", BuiltInFunction.dafuq)
