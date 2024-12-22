@@ -23,7 +23,7 @@ class TokenType(Enum):
     EQUZZ = 'EQUZZ' # equals, assignment
     
     # symbols
-    COLON = 'COLON' # colon, signifies type"
+    COLUZZ = 'COLUZZ' # colon, signifies type"
     SEMICOLUZZ = 'SEMICOLUZZ' # semicolon, end of line/statement
     LPARUZZ = 'LPARUZZ' # left parenthesis
     RPARUZZ = 'RPARUZZ' # right parenthesis

@@ -9,8 +9,8 @@ import llvmlite.binding as llvm
 from ctypes import CFUNCTYPE, c_int, c_float
 
 LEXER_DEBUG: bool = False
-PARSER_DEBUG: bool = False
-COMPILER_DEBUG: bool = True
+PARSER_DEBUG: bool = True
+COMPILER_DEBUG: bool = False
 
 if __name__ == '__main__':
     with open('tests/test.uzz', 'r') as f:

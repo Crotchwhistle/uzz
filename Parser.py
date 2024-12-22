@@ -4,9 +4,9 @@ from typing import Callable
 from enum import Enum, auto
 
 from AST import Statement, Expression, Program
-from AST import ExpressionStatement
+from AST import ExpressionStatement, LetStatement
 from AST import InfixExpression
-from AST import IntegerLiteral, FloatLiteral
+from AST import IntegerLiteral, FloatLiteral, IdentifierLiteral
 
 
 # precedence types
@@ -62,6 +62,9 @@ class Parser:
         self.current_token = self.peek_token
         self.peek_token = self.lexer.next_token()
 
+    def __current_token_is(self, tt: TokenType) -> bool:
+        return self.current_token.type == tt
+
     def __peek_token_is(self, tt: TokenType) -> bool:
         return self.peek_token.type == tt
     
@@ -106,7 +109,11 @@ class Parser:
     
     # region statement methods
     def __parse_statement(self) -> Statement:
-        return self.__parse_expression_statement()
+        match self.current_token.type:
+            case TokenType.LETUZZ:
+                return self.__parse_let_statement()
+            case _:
+                return self.__parse_expression_statement()
     
     def __parse_expression_statement(self) -> ExpressionStatement:
         expr = self.__parse_expression(PrecedenceType.P_LOWEST)
@@ -115,6 +122,35 @@ class Parser:
             self.__next_token()
 
         stmt: ExpressionStatement = ExpressionStatement(expr)
+
+        return stmt
+    
+    def __parse_let_statement(self) -> LetStatement:
+        # let a: int = 10;
+        stmt: LetStatement = LetStatement()
+
+        if not self.__expect_peek(TokenType.IDENTUZZ):
+            return None
+        
+        stmt.name = IdentifierLiteral(value=self.current_token.literal)
+
+        if not self.__expect_peek(TokenType.COLUZZ):
+            return None
+        
+        if not self.__expect_peek(TokenType.TYPUZZ):
+            return None
+        
+        stmt.value_type = self.current_token.literal
+
+        if not self.__expect_peek(TokenType.EQUZZ):
+            return None
+        
+        self.__next_token()
+
+        stmt.value = self.__parse_expression(PrecedenceType.P_LOWEST)
+
+        while not self.__current_token_is(TokenType.SEMICOLUZZ) and not self.__current_token_is(TokenType.EOFUZZ):
+            self.__next_token()
 
         return stmt
     # endregion
