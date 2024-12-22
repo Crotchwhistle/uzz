@@ -1,4 +1,4 @@
-from struzz_wuzz_arruzz import *
+from gruzz.struzz_wuzz_arruzz import *
 
 import string
 import os
@@ -2080,18 +2080,20 @@ class Interpreter:
       condition = lambda: i < end_value.value
     else:
       condition = lambda: i > end_value.value
-    
+
     while condition():
       context.symbol_table.set(node.var_name_tok.value, Number(i))
       i += step_value.value
 
       value = res.register(self.visit(node.body_node, context))
       if res.should_return() and res.loop_should_continue == False and res.loop_should_break == False: return res
-      
+
       if res.loop_should_continue:
+        res.loop_should_continue = False
         continue
-      
+
       if res.loop_should_break:
+        res.loop_should_break = False
         break
 
       elements.append(value)

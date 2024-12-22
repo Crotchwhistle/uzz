@@ -1,4 +1,4 @@
-import uzz
+import gruzz.uzz as uzz
 
 while True:
 	text = input('uzz > ')
