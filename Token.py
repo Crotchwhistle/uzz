@@ -52,9 +52,9 @@ KEYWORDS: dict[str, TokenType] = {
 }
 
 ALT_KEYWORDS: dict[str, TokenType] = {
-    "anyeonghaseyo": TokenType.LETUZZ,
-    "abg": TokenType.EQUZZ,
-    "torta": TokenType.SEMICOLUZZ
+    "ts": TokenType.LETUZZ,
+    "so": TokenType.EQUZZ,
+    "ahh": TokenType.SEMICOLUZZ
 }
 
 TYPE_KEYWORDS: list[str] = ['int', 'float']

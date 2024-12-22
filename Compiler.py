@@ -1,8 +1,11 @@
 from llvmlite import ir
 
-from AST import Node, NodeType, Program, Expression, Statement
-from AST import ExpressionStatement, InfixExpression
-from AST import IntegerLiteral, FloatLiteral
+from AST import Node, NodeType, Program, Expression
+from AST import ExpressionStatement, LetStatement
+from AST import InfixExpression
+from AST import IntegerLiteral, FloatLiteral, IdentifierLiteral
+
+from Environment import Environment
 
 class Compiler:
     def __init__(self) -> None:
@@ -15,6 +18,8 @@ class Compiler:
 
         self.builder: ir.IRBuilder = ir.IRBuilder()
 
+        self.env: Environment = Environment()
+
     def compile(self, node: Node) -> None:
         match node.type():
             case NodeType.Program:
@@ -23,6 +28,8 @@ class Compiler:
             # statements
             case NodeType.ExpressionStatement:
                 self.__visit_expression_statement(node)
+            case NodeType.LetStatement:
+                self.__visit_let_statement(node)
 
             # expressions
             case NodeType.InfixExpression:
@@ -51,6 +58,26 @@ class Compiler:
     # region statements
     def __visit_expression_statement(self, node: ExpressionStatement) -> None:
         self.compile(node.expr)
+    
+    def __visit_let_statement(self, node: LetStatement) -> None:
+        name: str = node.name.value
+        value: Expression = node.value
+        value_type: str = node.value_type # TODO: implement 
+
+        value, Type = self.__resolve_value(node=value)
+
+        if self.env.lookup(name) is None:
+            # define and allocate the variable
+            ptr = self.builder.alloca(Type)
+
+            # storing the value to the ptr
+            self.builder.store(value, ptr)
+
+            # add the variable to the environment
+            self.env.define(name, value, Type)
+        else:
+            ptr, _ = self.env.lookup(name)
+            self.builder.store(value, ptr)
     # endregion
 
     # region expressions
@@ -100,16 +127,20 @@ class Compiler:
     # endregion
 
     # region helper methods
-    def __resolve_value(self, node: Expression, value_type: str = None) -> tuple[ir.Value, ir.Type]:
+    def __resolve_value(self, node: Expression) -> tuple[ir.Value, ir.Type]:
         match node.type():
             case NodeType.IntegerLiteral:
                 node: IntegerLiteral = node
-                value, Type = node.value, self.type_map['int' if value_type is None else value_type]
+                value, Type = node.value, self.type_map['int']
                 return ir.Constant(Type, value), Type
             case NodeType.FloatLiteral:
                 node: FloatLiteral = node
-                value, Type = node.value, self.type_map['float' if value_type is None else value_type]
+                value, Type = node.value, self.type_map['float']
                 return ir.Constant(Type, value), Type
+            case NodeType.IdentifierLiteral:
+                node: IdentifierLiteral = node
+                ptr, Type = self.env.lookup(node.value)
+                return self.builder.load(ptr), Type
             
             # expression values
             case NodeType.InfixExpression:
