@@ -1,7 +1,7 @@
 from llvmlite import ir
 
 from AST import Node, NodeType, Program, Expression
-from AST import ExpressionStatement, LetStatement, BlockStatement, FunctionStatement, ReturnStatement
+from AST import ExpressionStatement, LetStatement, BlockStatement, FunctionStatement, ReturnStatement, AssignStatement
 from AST import InfixExpression
 from AST import IntegerLiteral, FloatLiteral, IdentifierLiteral
 
@@ -20,6 +20,9 @@ class Compiler:
 
         self.env: Environment = Environment()
 
+        # temp keeping track of errors
+        self.errors: list[str] = []
+
     def compile(self, node: Node) -> None:
         match node.type():
             case NodeType.Program:
@@ -36,6 +39,8 @@ class Compiler:
                 self.__visit_block_statement(node)
             case NodeType.ReturnStatement:
                 self.__visit_return_statement(node)
+            case NodeType.AssignStatement:
+                self.__visit_assign_statement(node)
 
             # expressions
             case NodeType.InfixExpression:
@@ -113,6 +118,18 @@ class Compiler:
         self.env.define(name, func, return_type)
 
         self.builder = previous_builder
+
+    def __visit_assign_statement(self, node: AssignStatement) -> None:
+        name: str = node.ident.value
+        value: Expression = node.right_value
+
+        value, Type = self.__resolve_value(value)
+
+        if self.env.lookup(name) is None:
+            self.errors.append(f"COMPILUZZ ERRUZZ: Identuzz {name} has nuzz been decluzzed befuzz it was re-assignuzzed.")
+        else:
+            ptr, _ = self.env.lookup(name)
+            self.builder.store(value, ptr)
     # endregion
 
     # region expressions
