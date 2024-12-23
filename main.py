@@ -3,6 +3,7 @@ from Parser import Parser
 from Compiler import Compiler
 from AST import Program
 import json
+import time
 
 from llvmlite import ir
 import llvmlite.binding as llvm
@@ -10,7 +11,8 @@ from ctypes import CFUNCTYPE, c_int, c_float
 
 LEXER_DEBUG: bool = False
 PARSER_DEBUG: bool = False
-COMPILER_DEBUG: bool = True
+COMPILER_DEBUG: bool = False
+RUN_CODE: bool = True
 
 if __name__ == '__main__':
     with open('tests/test.uzz', 'r') as f:
@@ -49,3 +51,31 @@ if __name__ == '__main__':
     if COMPILER_DEBUG:
         with open("debug/ir.ll", "w") as f:
             f.write(str(module))
+
+    if RUN_CODE:
+        llvm.initialize()
+        llvm.initialize_native_target()
+        llvm.initialize_native_asmprinter()
+
+        try:
+            llvm_ir_parsed = llvm.parse_assembly(str(module))
+            llvm_ir_parsed.verify()
+        except Exception as e:
+            print(e)
+            raise
+
+        target_machine = llvm.Target.from_default_triple().create_target_machine()
+
+        engine = llvm.create_mcjit_compiler(llvm_ir_parsed, target_machine)
+        engine.finalize_object()
+
+        entry = engine.get_function_address("main")
+        cfunc = CFUNCTYPE(c_int)(entry)
+
+        st = time.time()
+
+        result = cfunc()
+
+        et = time.time()
+
+        print(f"\n\nProgruzz returned: {result}\n=== Execuzzed in {round((et - st) * 1000, 6)} ms. ===")

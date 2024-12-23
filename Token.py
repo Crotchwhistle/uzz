@@ -25,11 +25,16 @@ class TokenType(Enum):
     # symbols
     COLUZZ = 'COLUZZ' # colon, signifies type"
     SEMICOLUZZ = 'SEMICOLUZZ' # semicolon, end of line/statement
+    ARRUZZ = 'ARRUZZ' # arrow, function return type
     LPARUZZ = 'LPARUZZ' # left parenthesis
     RPARUZZ = 'RPARUZZ' # right parenthesis
+    LBRACUZZ = 'LBRACUZZ' # left brace
+    RBRACUZZ = 'RBRACUZZ' # right brace
 
     # keywords
     LETUZZ = 'LETUZZ' # let keyword
+    FNUZZ = 'FNUZZ' # function keyword
+    RETURNUZZ = 'RETURNUZZ' # return keyword
 
     # typing
     TYPUZZ = 'TYPUZZ' 
@@ -48,13 +53,18 @@ class Token:
         return str(self)
     
 KEYWORDS: dict[str, TokenType] = {
-    "let": TokenType.LETUZZ
+    "let": TokenType.LETUZZ,
+    "fn": TokenType.FNUZZ,
+    "return": TokenType.RETURNUZZ
 }
 
 ALT_KEYWORDS: dict[str, TokenType] = {
     "ts": TokenType.LETUZZ,
     "so": TokenType.EQUZZ,
-    "ahh": TokenType.SEMICOLUZZ
+    "ahh": TokenType.SEMICOLUZZ,
+    "bruzz": TokenType.FNUZZ,
+    "huzz": TokenType.RETURNUZZ,
+    "jugg": TokenType.ARRUZZ
 }
 
 TYPE_KEYWORDS: list[str] = ['int', 'float']
