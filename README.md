@@ -13,7 +13,7 @@
 
 Clone the repository to your local machine:
 ``` 
-git clone https://github.com/yourusername/uzz-interpreter.git
+git clone https://github.com/Crotchwhistle/uzz.git
 cd uzz-interpreter 
 ```
 
