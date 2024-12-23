@@ -5,7 +5,7 @@ from enum import Enum, auto
 
 from AST import Statement, Expression, Program
 from AST import ExpressionStatement, LetStatement, FunctionStatement, ReturnStatement, BlockStatement, AssignStatement, IfStatement
-from AST import InfixExpression
+from AST import InfixExpression, CallExpression
 from AST import IntegerLiteral, FloatLiteral, IdentifierLiteral, BooleanLiteral
 
 
@@ -35,6 +35,7 @@ PRECEDENCES: dict[TokenType, PrecedenceType] = {
     TokenType.GTUZZ: PrecedenceType.P_LESSGREATER,
     TokenType.LT_EQUZZ: PrecedenceType.P_LESSGREATER,
     TokenType.GT_EQUZZ: PrecedenceType.P_LESSGREATER,
+    TokenType.LPARUZZ: PrecedenceType.P_CALL,
 }
 
 class Parser:
@@ -68,6 +69,7 @@ class Parser:
             TokenType.GTUZZ: self.__parse_infix_expression,
             TokenType.LT_EQUZZ: self.__parse_infix_expression,
             TokenType.GT_EQUZZ: self.__parse_infix_expression,
+            TokenType.LPARUZZ: self.__parse_call_expression,
         } 
 
         self.__next_token()
@@ -307,6 +309,14 @@ class Parser:
 
         expr: Expression = self.__parse_expression(PrecedenceType.P_LOWEST)
 
+        if not self.__expect_peek(TokenType.RPARUZZ):
+            return None
+        
+        return expr
+    
+    def __parse_call_expression(self, function: Expression) -> CallExpression:
+        expr: CallExpression = CallExpression(function=function)
+        expr.arguments = [] # TODO
         if not self.__expect_peek(TokenType.RPARUZZ):
             return None
         
