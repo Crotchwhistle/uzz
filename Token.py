@@ -21,6 +21,14 @@ class TokenType(Enum):
 
     # assignment
     EQUZZ = 'EQUZZ' # equals, assignment
+
+    # comparison
+    LTUZZ = '<'
+    GTUZZ = '>'
+    EQUZZ_EQUZZ = '=='
+    NEQUZZ = '!='
+    LT_EQUZZ = '<='
+    GT_EQUZZ = '>='
     
     # symbols
     COLUZZ = 'COLUZZ' # colon, signifies type"
@@ -35,6 +43,10 @@ class TokenType(Enum):
     LETUZZ = 'LETUZZ' # let keyword
     FNUZZ = 'FNUZZ' # function keyword
     RETURNUZZ = 'RETURNUZZ' # return keyword
+    IFUZZ = 'IFUZZ' # if keyword
+    ELSUZZ = 'ELSUZZ' # else keyword
+    TRUZZ = 'TRUZZ' # true keyword
+    FALUZZ = 'FALUZZ' # false keyword
 
     # typing
     TYPUZZ = 'TYPUZZ' 
@@ -55,7 +67,11 @@ class Token:
 KEYWORDS: dict[str, TokenType] = {
     "let": TokenType.LETUZZ,
     "fn": TokenType.FNUZZ,
-    "return": TokenType.RETURNUZZ
+    "return": TokenType.RETURNUZZ,
+    "if": TokenType.IFUZZ,
+    "else": TokenType.ELSUZZ,
+    "true": TokenType.TRUZZ,
+    "false": TokenType.FALUZZ
 }
 
 ALT_KEYWORDS: dict[str, TokenType] = {
@@ -64,7 +80,11 @@ ALT_KEYWORDS: dict[str, TokenType] = {
     "ahh": TokenType.SEMICOLUZZ,
     "bruzz": TokenType.FNUZZ,
     "huzz": TokenType.RETURNUZZ,
-    "jugg": TokenType.ARRUZZ
+    "jugg": TokenType.ARRUZZ,
+    "nettspend": TokenType.IFUZZ,
+    "osamason": TokenType.ELSUZZ,
+    "slime": TokenType.TRUZZ,
+    "opp": TokenType.FALUZZ 
 }
 
 TYPE_KEYWORDS: list[str] = ['int', 'float']

@@ -100,8 +100,39 @@ class Lexer:
                 tok = self.__new_token(TokenType.POWUZZ, self.current_char)
             case '%':
                 tok = self.__new_token(TokenType.MODULUZZ, self.current_char)
+            case '<':
+                # handle <=
+                if self.__peek_char() == '=':
+                    ch = self.current_char
+                    self.__read_char()
+                    tok = self.__new_token(TokenType.LT_EQUZZ, ch + self.current_char)
+                else:
+                    tok = self.__new_token(TokenType.LTUZZ, self.current_char)
+            case '>':
+                # handle >=
+                if self.__peek_char() == '=':
+                    ch = self.current_char
+                    self.__read_char()
+                    tok = self.__new_token(TokenType.GT_EQUZZ, ch + self.current_char)
+                else:
+                    tok = self.__new_token(TokenType.GTUZZ, self.current_char)
             case '=':
-                tok = self.__new_token(TokenType.EQUZZ, self.current_char)
+                # handle ==
+                if self.__peek_char() == '=':
+                    ch = self.current_char
+                    self.__read_char()
+                    tok = self.__new_token(TokenType.EQUZZ_EQUZZ, ch + self.current_char)
+                else:
+                    tok = self.__new_token(TokenType.EQUZZ, self.current_char)
+            case '!':
+                # handle !=
+                if self.__peek_char() == '=':
+                    ch = self.current_char
+                    self.__read_char()
+                    tok = self.__new_token(TokenType.NEQUZZ, ch + self.current_char)
+                else:
+                    # TODO implement bang
+                    tok = self.__new_token(TokenType.ILLEGUZZ, self.current_char)
             case ':':
                 tok = self.__new_token(TokenType.COLUZZ, self.current_char)
             case '(':
