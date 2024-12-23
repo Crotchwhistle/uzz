@@ -6,18 +6,37 @@
                 "type": "FunctionStatement",
                 "name": {
                     "type": "IdentifierLiteral",
-                    "value": "test"
+                    "value": "add"
                 },
                 "return_type": "int",
-                "parameters": [],
+                "parameters": [
+                    {
+                        "type": "FunctionParamter",
+                        "name": "a",
+                        "value_type": "int"
+                    },
+                    {
+                        "type": "FunctionParamter",
+                        "name": "b",
+                        "value_type": "int"
+                    }
+                ],
                 "body": {
                     "type": "BlockStatement",
                     "statements": [
                         {
                             "type": "ReturnStatement",
                             "return_value": {
-                                "type": "IntegerLiteral",
-                                "value": 69
+                                "type": "InfixExpression",
+                                "left_node": {
+                                    "type": "IdentifierLiteral",
+                                    "value": "a"
+                                },
+                                "operator": "+",
+                                "right_node": {
+                                    "type": "IdentifierLiteral",
+                                    "value": "b"
+                                }
                             }
                         }
                     ]
@@ -42,9 +61,18 @@
                                 "type": "CallExpression",
                                 "function": {
                                     "type": "IdentifierLiteral",
-                                    "value": "test"
+                                    "value": "add"
                                 },
-                                "arguments": []
+                                "arguments": [
+                                    {
+                                        "type": "IntegerLiteral",
+                                        "value": 1
+                                    },
+                                    {
+                                        "type": "IntegerLiteral",
+                                        "value": 2
+                                    }
+                                ]
                             }
                         }
                     ]

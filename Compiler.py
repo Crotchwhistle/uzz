@@ -4,6 +4,7 @@ from AST import Node, NodeType, Program, Expression
 from AST import ExpressionStatement, LetStatement, BlockStatement, FunctionStatement, ReturnStatement, AssignStatement, IfStatement
 from AST import InfixExpression, CallExpression
 from AST import IntegerLiteral, FloatLiteral, IdentifierLiteral, BooleanLiteral
+from AST import FunctionParameter
 
 from Environment import Environment
 
@@ -113,13 +114,13 @@ class Compiler:
     def __visit_function_statement(self, node: FunctionStatement) -> None:
         name: str = node.name.value
         body: BlockStatement = node.body
-        params: list[IdentifierLiteral] = node.parameters
+        params: list[FunctionParameter] = node.parameters
 
         # keep track of names of each parameter
-        param_names: list[str] = [p.value for p in params]
+        param_names: list[str] = [p.name for p in params]
 
         # keep track of types of each parameter
-        param_types: list[ir.Type] = [] # TODO
+        param_types: list[ir.Type] = [self.type_map[p.value_type] for p in params]
 
         return_type: ir.Type = self.type_map[node.return_type]
 
@@ -132,9 +133,22 @@ class Compiler:
 
         self.builder = ir.IRBuilder(block)
 
-        previous_env = self.env
+        # storing the pointers to each param
+        params_ptrs = []
+        for i, typ in enumerate(param_types):
+            ptr = self.builder.alloca(typ)
+            self.builder.store(func.args[i], ptr)
+            params_ptrs.append(ptr)
 
+        # add params to env
+        previous_env = self.env
         self.env = Environment(parent=self.env)
+        for i, x in enumerate(zip(param_types, param_names)):
+            typ = param_types[i]
+            ptr = params_ptrs[i]
+
+            self.env.define(x[1], ptr, typ)
+
         self.env.define(name, func, return_type)
 
         self.compile(body)
@@ -254,13 +268,17 @@ class Compiler:
         
         return value, Type
     
-    def __visit_call_expression(self, node: CallExpression) -> None:
+    def __visit_call_expression(self, node: CallExpression) -> tuple[ir.Instruction, ir.Type]:
         name: str = node.function.value
         params: list[Expression] = node.arguments
 
         args = []
         types = []
-        # TODO
+        if len(params) > 0:
+            for x in params:
+                p_val, p_type = self.__resolve_value(x)
+                args.append(p_val)
+                types.append(p_type)
 
         match name:
             case _:

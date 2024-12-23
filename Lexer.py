@@ -135,6 +135,8 @@ class Lexer:
                     tok = self.__new_token(TokenType.ILLEGUZZ, self.current_char)
             case ':':
                 tok = self.__new_token(TokenType.COLUZZ, self.current_char)
+            case ',':
+                tok = self.__new_token(TokenType.COMMUZZ, self.current_char)
             case '(':
                 tok = self.__new_token(TokenType.LPARUZZ, self.current_char)
             case ')':

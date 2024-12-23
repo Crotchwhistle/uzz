@@ -32,6 +32,7 @@ class TokenType(Enum):
     
     # symbols
     COLUZZ = 'COLUZZ' # colon, signifies type"
+    COMMUZZ = 'COMMUZZ' # comma, separates arguments
     SEMICOLUZZ = 'SEMICOLUZZ' # semicolon, end of line/statement
     ARRUZZ = 'ARRUZZ' # arrow, function return type
     LPARUZZ = 'LPARUZZ' # left parenthesis
