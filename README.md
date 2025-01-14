@@ -45,6 +45,7 @@ Progruzz returned: 300
 ```
 
 ## Dynamic Syntax
+
 In `Token.py` you can find two dictionaries: KEYWORDS and ALT_KEYWORDS. These are set up so that you can map both dictionaries to work with each other as the syntax. The KEYWORDS dictionary is the regular non-brainrot syntax that makes sense, and the ALT_KEYWORDS is the brainrot dictionary. You can choose to code exclusively in either brainrot or regularly, or mix both.
 
 For example, the code in the example above could be re-written as:
@@ -68,6 +69,23 @@ bruzz main() jugg int {
 }
 ```
 Both will return the same result.
+
+## Builtin Functions
+
+So far only a `printf` function exists. It can be used like this:
+
+```
+fn add(a: int, b: int) -> int {
+    return a + b;
+}
+
+fn main() -> int {
+    printf("goat %i", add(2, 3));
+    return add(1, 2);
+}
+```
+
+This will return `goat 5`
 
 ### How It Works
 
