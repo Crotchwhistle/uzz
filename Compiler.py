@@ -2,6 +2,7 @@ from llvmlite import ir
 
 from AST import Node, NodeType, Program, Expression
 from AST import ExpressionStatement, LetStatement, FunctionStatement, ReturnStatement, BlockStatement, AssignStatement, IfStatement
+from AST import WhileStatement
 from AST import InfixExpression, CallExpression
 from AST import IntegerLiteral, FloatLiteral, IdentifierLiteral, BooleanLiteral, StringLiteral
 from AST import FunctionParameter
@@ -91,6 +92,8 @@ class Compiler:
                 self.__visit_assign_statement(node)
             case NodeType.IfStatement:
                 self.__visit_if_statement(node)
+            case NodeType.WhileStatement:
+                self.__visit_while_statement(node)
 
             # Expressions
             case NodeType.InfixExpression:
@@ -222,6 +225,34 @@ class Compiler:
                 
                 with otherwise:
                     self.compile(alternative)
+    
+    def __visit_while_statement(self, node: WhileStatement) -> None:
+        condition: Expression = node.condition
+        body: BlockStatement = node.body
+
+        test, _ = self.__resolve_value(condition)
+
+        while_loop_entry = self.builder.append_basic_block(f"while_loop_entry_{self.__increment_counter()}")
+
+        while_loop_otherwise = self.builder.append_basic_block(f"while_loop_otherwise_{self.counter}")
+
+        # creating a condition branch
+        #      condition
+        #        / \
+        #  if true  if false
+        #       /   \
+        #      /     \
+        # true block  false block
+        self.builder.cbranch(test, while_loop_entry, while_loop_otherwise)
+
+        self.builder.position_at_start(while_loop_entry)
+
+        self.compile(body)
+
+        test, _ = self.__resolve_value(condition)
+
+        self.builder.cbranch(test, while_loop_entry, while_loop_otherwise)
+        self.builder.position_at_start(while_loop_otherwise)
     # endregion
         
     # region Expressions

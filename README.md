@@ -70,9 +70,11 @@ bruzz main() jugg int {
 ```
 Both will return the same result.
 
-## Builtin Functions
+## Built-in Functions
 
-So far only a `printf` function exists. It can be used like this:
+### `printf` function
+
+The `printf` function can be used like this:
 
 ```
 fn add(a: int, b: int) -> int {
@@ -85,7 +87,42 @@ fn main() -> int {
 }
 ```
 
-This will return `goat 5`
+This will return `goat 5`.
+
+### `while` loops
+
+The following code:
+
+```
+fn main() -> int {
+    let a: int = 0;
+
+    while a < 10 {
+        printf("a = %i\n", a);
+        a = a + 1;
+    }
+
+    return a;
+}
+```
+
+will return this:
+
+```
+a = 0
+a = 1
+a = 2
+a = 3
+a = 4
+a = 5
+a = 6
+a = 7
+a = 8
+a = 9
+
+Progruzz returned: 10
+=== Execuzzed in 0.0 ms. ===
+```
 
 ### How It Works
 

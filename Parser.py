@@ -5,6 +5,7 @@ from enum import Enum, auto
 
 from AST import Statement, Expression, Program
 from AST import ExpressionStatement, LetStatement, FunctionStatement, ReturnStatement, BlockStatement, AssignStatement, IfStatement
+from AST import WhileStatement
 from AST import InfixExpression, CallExpression
 from AST import IntegerLiteral, FloatLiteral, IdentifierLiteral, BooleanLiteral, StringLiteral
 from AST import FunctionParameter
@@ -155,6 +156,8 @@ class Parser:
                 return self.__parse_function_statement()
             case TokenType.RETURN:
                 return self.__parse_return_statement()
+            case TokenType.WHILE:
+                return self.__parse_while_statement()
             case _:
                 return self.__parse_expression_statement()
     
@@ -329,6 +332,21 @@ class Parser:
             alternative = self.__parse_block_statement()
 
         return IfStatement(condition=condition, consequence=consequence, alternative=alternative)
+    
+    def __parse_while_statement(self) -> WhileStatement:
+        condition: Expression = None
+        body: BlockStatement = None
+
+        self.__next_token()
+
+        condition = self.__parse_expression(PrecedenceType.P_LOWEST)
+
+        if not self.__expect_peek(TokenType.LBRACE):
+            return None
+        
+        body = self.__parse_block_statement()
+
+        return WhileStatement(condition=condition, body=body)
     # endregion
 
     # region Expression Methods

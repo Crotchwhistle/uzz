@@ -12,6 +12,7 @@ class NodeType(Enum):
     ReturnStatement = "ReturnStatement"
     AssignStatement = "AssignStatement"
     IfStatement = "IfStatement"
+    WhileStatement = "WhileStatement"
 
     # Expressions
     InfixExpression = "InfixExpression"
@@ -183,6 +184,21 @@ class IfStatement(Statement):
             "condition": self.condition.json(),
             "consequence": self.consequence.json(),
             "alternative": self.alternative.json() if self.alternative is not None else None
+        }
+    
+class WhileStatement(Statement):
+    def __init__(self, condition: Expression, body: BlockStatement = None) -> None:
+        self.condition = condition
+        self.body = body if body is not None else []
+
+    def type(self) -> NodeType:
+        return NodeType.WhileStatement
+    
+    def json(self) -> dict:
+        return {
+            "type": self.type().value,
+            "condition": self.condition.json(),
+            "body": self.body.json()
         }
 # endregion
     
