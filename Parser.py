@@ -5,7 +5,7 @@ from enum import Enum, auto
 
 from AST import Statement, Expression, Program
 from AST import ExpressionStatement, LetStatement, FunctionStatement, ReturnStatement, BlockStatement, AssignStatement, IfStatement
-from AST import WhileStatement
+from AST import WhileStatement, BreakStatement, ContinueStatement, ForStatement
 from AST import InfixExpression, CallExpression
 from AST import IntegerLiteral, FloatLiteral, IdentifierLiteral, BooleanLiteral, StringLiteral
 from AST import FunctionParameter
@@ -158,6 +158,12 @@ class Parser:
                 return self.__parse_return_statement()
             case TokenType.WHILE:
                 return self.__parse_while_statement()
+            case TokenType.BREAK:
+                return self.__parse_break_statement()
+            case TokenType.CONTINUE:
+                return self.__parse_continue_statement()
+            case TokenType.FOR:
+                return self.__parse_for_statement()
             case _:
                 return self.__parse_expression_statement()
     
@@ -347,6 +353,43 @@ class Parser:
         body = self.__parse_block_statement()
 
         return WhileStatement(condition=condition, body=body)
+    
+    def __parse_break_statement(self) -> BreakStatement:
+        self.__next_token()
+        return BreakStatement()
+    
+    def __parse_continue_statement(self) -> ContinueStatement:
+        self.__next_token()
+        return ContinueStatement()
+    
+    def __parse_for_statement(self) -> ForStatement:
+        stmt: ForStatement = ForStatement()
+
+        if not self.__expect_peek(TokenType.LPAREN):
+            return None
+        
+        if not self.__expect_peek(TokenType.LET):
+            return None
+        
+        stmt.var_declaration = self.__parse_let_statement()
+
+        self.__next_token()
+
+        stmt.condition = self.__parse_expression(PrecedenceType.P_LOWEST)
+
+        if not self.__expect_peek(TokenType.SEMICOLON):
+            return None
+        
+        self.__next_token()
+        
+        stmt.action = self.__parse_assignment_statement()
+
+        if not self.__expect_peek(TokenType.LBRACE):
+            return None
+        
+        stmt.body = self.__parse_block_statement()
+
+        return stmt
     # endregion
 
     # region Expression Methods

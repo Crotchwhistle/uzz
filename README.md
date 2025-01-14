@@ -124,6 +124,40 @@ Progruzz returned: 10
 === Execuzzed in 0.0 ms. ===
 ```
 
+### `for` loops
+
+The following code:
+
+```
+fn main() -> int {
+    let a: int = 0;
+
+    for (let i: int = 0; i < 10; i = i + 1) {
+        if (i == 5) {
+            break;
+        }
+
+        printf("i = %i\n", i);
+        a = i;
+    }
+
+    return a;
+}
+```
+
+will return:
+
+```
+i = 0
+i = 1
+i = 2
+i = 3
+i = 4
+
+Progruzz returned: 4
+=== Execuzzed in 0.0 ms. ===
+```
+
 ### How It Works
 
 #### Lexer

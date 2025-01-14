@@ -2,7 +2,7 @@ from llvmlite import ir
 
 from AST import Node, NodeType, Program, Expression
 from AST import ExpressionStatement, LetStatement, FunctionStatement, ReturnStatement, BlockStatement, AssignStatement, IfStatement
-from AST import WhileStatement
+from AST import WhileStatement, BreakStatement, ContinueStatement, ForStatement
 from AST import InfixExpression, CallExpression
 from AST import IntegerLiteral, FloatLiteral, IdentifierLiteral, BooleanLiteral, StringLiteral
 from AST import FunctionParameter
@@ -38,6 +38,10 @@ class Compiler:
 
         # Initialize Builtin functions and values
         self.__initialize_builtins()
+
+        # Keep a reference to the compiling loop blocks
+        self.breakpoints: list[ir.Block] = []
+        self.continues: list[ir.Block] = []
 
     def __initialize_builtins(self) -> None:
         def __init_print() -> ir.Function:
@@ -94,6 +98,12 @@ class Compiler:
                 self.__visit_if_statement(node)
             case NodeType.WhileStatement:
                 self.__visit_while_statement(node)
+            case NodeType.BreakStatement:
+                self.__visit_break_statement(node)
+            case NodeType.ContinueStatement:
+                self.__visit_continue_statement(node)
+            case NodeType.ForStatement:
+                self.__visit_for_statement(node)
 
             # Expressions
             case NodeType.InfixExpression:
@@ -253,6 +263,45 @@ class Compiler:
 
         self.builder.cbranch(test, while_loop_entry, while_loop_otherwise)
         self.builder.position_at_start(while_loop_otherwise)
+
+    def __visit_break_statement(self, node: BreakStatement) -> None:
+        self.builder.branch(self.breakpoints[-1])
+
+    def __visit_continue_statement(self, node: ContinueStatement) -> None:
+        self.builder.branch(self.continues[-1])
+
+    def __visit_for_statement(self, node: ForStatement) -> None:
+        var_declaration: LetStatement = node.var_declaration
+        condition: Expression = node.condition
+        action: AssignStatement = node.action
+        body: BlockStatement = node.body
+
+        previous_env = self.env
+        self.env = Environment(parent=previous_env)
+
+        self.compile(var_declaration)
+
+        for_loop_entry = self.builder.append_basic_block(f"for_loop_entry_{self.__increment_counter()}")
+        for_loop_otherwise = self.builder.append_basic_block(f"for_loop_otherwise_{self.counter}")
+
+        self.breakpoints.append(for_loop_otherwise)
+        self.continues.append(for_loop_entry)
+
+        self.builder.branch(for_loop_entry)
+        self.builder.position_at_start(for_loop_entry)
+
+        self.compile(body)
+
+        self.compile(action)
+
+        test, _ = self.__resolve_value(condition)
+
+        self.builder.cbranch(test, for_loop_entry, for_loop_otherwise)
+
+        self.builder.position_at_start(for_loop_otherwise)
+
+        self.breakpoints.pop()
+        self.continues.pop()
     # endregion
         
     # region Expressions
