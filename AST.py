@@ -2,38 +2,43 @@ from abc import ABC, abstractmethod
 from enum import Enum
 
 class NodeType(Enum):
-    Program = 'Program'
+    Program = "Program"
 
-    # statements
-    ExpressionStatement = 'ExpressionStatement'
-    LetStatement = 'LetStatement'
-    FunctionStatement = 'FunctionStatement'
-    BlockStatement = 'BlockStatement'
-    ReturnStatement = 'ReturnStatement'
-    AssignStatement = 'AssignStatement'
-    IfStatement = 'IfStatement'
+    # Statements
+    ExpressionStatement = "ExpressionStatement"
+    LetStatement = "LetStatement"
+    FunctionStatement = "FunctionStatement"
+    BlockStatement = "BlockStatement"
+    ReturnStatement = "ReturnStatement"
+    AssignStatement = "AssignStatement"
+    IfStatement = "IfStatement"
 
-    # expressions
-    InfixExpression = 'InfixExpression'
-    CallExpression = 'CallExpression'
+    # Expressions
+    InfixExpression = "InfixExpression"
+    CallExpression = "CallExpression"
 
-    # literals
-    IntegerLiteral = 'IntegerLiteral'
-    FloatLiteral = 'FloatLiteral'
-    IdentifierLiteral = 'IdentifierLiteral'
-    BooleanLiteral = 'BooleanLiteral'
+    # Literals
+    IntegerLiteral = "IntegerLiteral"
+    FloatLiteral = "FloatLiteral"
+    IdentifierLiteral = "IdentifierLiteral"
+    BooleanLiteral = "BooleanLiteral"
+    StringLiteral = "StringLiteral"
 
-    # helper
-    FunctionParamter = 'FunctionParamter'
+    # Helper
+    FunctionParameter = "FunctionParameter"
+
 
 class Node(ABC):
     @abstractmethod
     def type(self) -> NodeType:
+        """ Returns back the NodeType """
         pass
 
     @abstractmethod
     def json(self) -> dict:
+        """ Returns back the JSON representation of this AST node """
         pass
+
 
 class Statement(Node):
     pass
@@ -42,6 +47,7 @@ class Expression(Node):
     pass
 
 class Program(Node):
+    """ The root node for the AST """
     def __init__(self) -> None:
         self.statements: list[Statement] = []
 
@@ -54,14 +60,14 @@ class Program(Node):
             "statements": [{stmt.type().value: stmt.json()} for stmt in self.statements]
         }
     
-# region helpers
-class FunctionParameter(Node):
+# region Helpers
+class FunctionParameter(Expression):
     def __init__(self, name: str, value_type: str = None) -> None:
         self.name = name
         self.value_type = value_type
 
     def type(self) -> NodeType:
-        return NodeType.FunctionParamter
+        return NodeType.FunctionParameter
     
     def json(self) -> dict:
         return {
@@ -70,8 +76,8 @@ class FunctionParameter(Node):
             "value_type": self.value_type
         }
 # endregion
-    
-# region statements
+
+# region Statements
 class ExpressionStatement(Statement):
     def __init__(self, expr: Expression = None) -> None:
         self.expr: Expression = expr
@@ -179,10 +185,10 @@ class IfStatement(Statement):
             "alternative": self.alternative.json() if self.alternative is not None else None
         }
 # endregion
-
-# region expressions
+    
+# region Expressions
 class InfixExpression(Expression):
-    def __init__(self, left_node: Expression, operator: str, right_node: Expression = None) -> None:
+    def __init__(self, left_node: Expression, operator: str, right_node: Expression = None):
         self.left_node: Expression = left_node
         self.operator: str = operator
         self.right_node: Expression = right_node
@@ -200,7 +206,7 @@ class InfixExpression(Expression):
 
 class CallExpression(Expression):
     def __init__(self, function: Expression = None, arguments: list[Expression] = None) -> None:
-        self.function = function # identifier literal
+        self.function = function # IdentifierLiteral
         self.arguments = arguments
 
     def type(self) -> NodeType:
@@ -214,11 +220,11 @@ class CallExpression(Expression):
         }
 # endregion
 
-# region literals
+# region Literals
 class IntegerLiteral(Expression):
     def __init__(self, value: int = None) -> None:
         self.value: int = value
-
+    
     def type(self) -> NodeType:
         return NodeType.IntegerLiteral
     
@@ -231,7 +237,7 @@ class IntegerLiteral(Expression):
 class FloatLiteral(Expression):
     def __init__(self, value: float = None) -> None:
         self.value: float = value
-
+    
     def type(self) -> NodeType:
         return NodeType.FloatLiteral
     
@@ -244,7 +250,7 @@ class FloatLiteral(Expression):
 class IdentifierLiteral(Expression):
     def __init__(self, value: str = None) -> None:
         self.value: str = value
-
+    
     def type(self) -> NodeType:
         return NodeType.IdentifierLiteral
     
@@ -255,11 +261,24 @@ class IdentifierLiteral(Expression):
         }
     
 class BooleanLiteral(Expression):
-    def __init__(self, value: str = None) -> None:
-        self.value: str = value
-
+    def __init__(self, value: bool = None) -> None:
+        self.value: bool = value
+    
     def type(self) -> NodeType:
         return NodeType.BooleanLiteral
+    
+    def json(self) -> dict:
+        return {
+            "type": self.type().value,
+            "value": self.value
+        }
+    
+class StringLiteral(Expression):
+    def __init__(self, value: str = None) -> None:
+        self.value: str = value
+    
+    def type(self) -> NodeType:
+        return NodeType.StringLiteral
     
     def json(self) -> dict:
         return {

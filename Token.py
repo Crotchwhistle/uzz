@@ -2,55 +2,57 @@ from enum import Enum
 from typing import Any
 
 class TokenType(Enum):
-    # special tokens
-    EOFUZZ = 'EOFUZZ' # eof = end of file
-    ILLEGUZZ = 'ILLEGUZZ' # illegal
+    # Special Tokens
+    EOF = "EOF"
+    ILLEGAL = "ILLEGAL"
 
-    # data types
-    IDENTUZZ = 'IDENTUZZ' # identifier
-    INTUZZ = 'INTUZZ' # integer
-    FLOATUZZ = 'FLOATUZZ' # float
+    # Data Types
+    IDENT = "IDENT"
+    INT = "INT"
+    FLOAT = "FLOAT"
+    STRING = "STRING"
 
-    # arithmetic symbols
-    PLUZZ = 'PLUZZ' # plus, addition
-    MINUZZ = 'MINUZZ' # minus, subtraction
-    ASTERUZZ = 'ASTERUZZ' # asterisk, multiplication
-    SLUZZ = 'SLUZZ' # slash, division
-    POWUZZ = 'POWUZZ' # power, exponentiation
-    MODULUZZ = 'MODULUZZ' # modulo, remainder, percent
+    # Arithmetic Symbols
+    PLUS = "PLUS"
+    MINUS = "MINUS"
+    ASTERISK = "ASTERISK"
+    SLASH = "SLASH"
+    POW = "POW"
+    MODULUS = "MODULUS"
 
-    # assignment
-    EQUZZ = 'EQUZZ' # equals, assignment
+    # Assignment Symbols
+    EQ = "EQ"
 
-    # comparison
-    LTUZZ = '<'
-    GTUZZ = '>'
-    EQUZZ_EQUZZ = '=='
-    NEQUZZ = '!='
-    LT_EQUZZ = '<='
-    GT_EQUZZ = '>='
-    
-    # symbols
-    COLUZZ = 'COLUZZ' # colon, signifies type"
-    COMMUZZ = 'COMMUZZ' # comma, separates arguments
-    SEMICOLUZZ = 'SEMICOLUZZ' # semicolon, end of line/statement
-    ARRUZZ = 'ARRUZZ' # arrow, function return type
-    LPARUZZ = 'LPARUZZ' # left parenthesis
-    RPARUZZ = 'RPARUZZ' # right parenthesis
-    LBRACUZZ = 'LBRACUZZ' # left brace
-    RBRACUZZ = 'RBRACUZZ' # right brace
+    # Comparison Symbols
+    LT = '<'
+    GT = '>'
+    EQ_EQ = '=='
+    NOT_EQ = '!='
+    LT_EQ = '<='
+    GT_EQ = '>='
 
-    # keywords
-    LETUZZ = 'LETUZZ' # let keyword
-    FNUZZ = 'FNUZZ' # function keyword
-    RETURNUZZ = 'RETURNUZZ' # return keyword
-    IFUZZ = 'IFUZZ' # if keyword
-    ELSUZZ = 'ELSUZZ' # else keyword
-    TRUZZ = 'TRUZZ' # true keyword
-    FALUZZ = 'FALUZZ' # false keyword
+    # Symbols
+    COLON = "COLON"
+    COMMA = "COMMA"
+    SEMICOLON = "SEMICOLON"
+    ARROW = "ARROW"
+    LPAREN = "LPAREN"
+    RPAREN = "RPAREN"
+    LBRACE = "LBRACE"
+    RBRACE = "RBRACE"
 
-    # typing
-    TYPUZZ = 'TYPUZZ' 
+    # Keywords
+    LET = "LET"
+    FN = "FN"
+    RETURN = "RETURN"
+    IF = "IF"
+    ELSE = "ELSE"
+    TRUE = "TRUE"
+    FALSE = "FALSE"
+
+    # Typing
+    TYPE = "TYPE"
+
 
 class Token:
     def __init__(self, type: TokenType, literal: Any, line_no: int, position: int) -> None:
@@ -61,34 +63,35 @@ class Token:
 
     def __str__(self) -> str:
         return f"Token[{self.type} : {self.literal} : Line {self.line_no} : Position {self.position}]"
-
+    
     def __repr__(self) -> str:
         return str(self)
     
+
 KEYWORDS: dict[str, TokenType] = {
-    "let": TokenType.LETUZZ,
-    "fn": TokenType.FNUZZ,
-    "return": TokenType.RETURNUZZ,
-    "if": TokenType.IFUZZ,
-    "else": TokenType.ELSUZZ,
-    "true": TokenType.TRUZZ,
-    "false": TokenType.FALUZZ
+    "let": TokenType.LET,
+    "fn": TokenType.FN,
+    "return": TokenType.RETURN,
+    "if": TokenType.IF,
+    "else": TokenType.ELSE,
+    "true": TokenType.TRUE,
+    "false": TokenType.FALSE
 }
 
 ALT_KEYWORDS: dict[str, TokenType] = {
-    "ts": TokenType.LETUZZ,
-    "so": TokenType.EQUZZ,
-    "ahh": TokenType.SEMICOLUZZ,
-    "bruzz": TokenType.FNUZZ,
-    "huzz": TokenType.RETURNUZZ,
-    "jugg": TokenType.ARRUZZ,
-    "nettspend": TokenType.IFUZZ,
-    "osamason": TokenType.ELSUZZ,
-    "slime": TokenType.TRUZZ,
-    "opp": TokenType.FALUZZ 
+    "ts": TokenType.LET,
+    "so": TokenType.EQ,
+    "ahh": TokenType.SEMICOLON,
+    "bruzz": TokenType.FN,
+    "huzz": TokenType.RETURN,
+    "jugg--D": TokenType.ARROW,
+    "nettspend": TokenType.IF,
+    "osamason": TokenType.ELSE,
+    "slime": TokenType.TRUE,
+    "opp": TokenType.FALSE,
 }
 
-TYPE_KEYWORDS: list[str] = ['int', 'float']
+TYPE_KEYWORDS: list[str] = ["int", "float", "str", "void"]
 
 def lookup_ident(ident: str) -> TokenType:
     tt: TokenType | None = KEYWORDS.get(ident)
@@ -100,6 +103,6 @@ def lookup_ident(ident: str) -> TokenType:
         return tt
     
     if ident in TYPE_KEYWORDS:
-        return TokenType.TYPUZZ
+        return TokenType.TYPE
     
-    return TokenType.IDENTUZZ
+    return TokenType.IDENT

@@ -6,11 +6,10 @@ from enum import Enum, auto
 from AST import Statement, Expression, Program
 from AST import ExpressionStatement, LetStatement, FunctionStatement, ReturnStatement, BlockStatement, AssignStatement, IfStatement
 from AST import InfixExpression, CallExpression
-from AST import IntegerLiteral, FloatLiteral, IdentifierLiteral, BooleanLiteral
+from AST import IntegerLiteral, FloatLiteral, IdentifierLiteral, BooleanLiteral, StringLiteral
 from AST import FunctionParameter
 
-
-# precedence types
+# Precedence Types
 class PrecedenceType(Enum):
     P_LOWEST = 0
     P_EQUALS = auto()
@@ -22,62 +21,78 @@ class PrecedenceType(Enum):
     P_CALL = auto()
     P_INDEX = auto()
 
-# precedence map
-PRECEDENCES: dict[TokenType, PrecedenceType] = {
-    TokenType.PLUZZ: PrecedenceType.P_SUM,
-    TokenType.MINUZZ: PrecedenceType.P_SUM,
-    TokenType.SLUZZ: PrecedenceType.P_PRODUCT,
-    TokenType.ASTERUZZ: PrecedenceType.P_PRODUCT,
-    TokenType.MODULUZZ: PrecedenceType.P_PRODUCT,
-    TokenType.POWUZZ: PrecedenceType.P_EXPONENT,
-    TokenType.EQUZZ_EQUZZ: PrecedenceType.P_EQUALS,
-    TokenType.NEQUZZ: PrecedenceType.P_EQUALS,
-    TokenType.LTUZZ: PrecedenceType.P_LESSGREATER,
-    TokenType.GTUZZ: PrecedenceType.P_LESSGREATER,
-    TokenType.LT_EQUZZ: PrecedenceType.P_LESSGREATER,
-    TokenType.GT_EQUZZ: PrecedenceType.P_LESSGREATER,
-    TokenType.LPARUZZ: PrecedenceType.P_CALL,
+# Precedence Mapping
+PRECEDENCES: dict[TokenType, int] = {
+    TokenType.PLUS: PrecedenceType.P_SUM,
+    TokenType.MINUS: PrecedenceType.P_SUM,
+    TokenType.SLASH: PrecedenceType.P_PRODUCT,
+    TokenType.ASTERISK: PrecedenceType.P_PRODUCT,
+    TokenType.MODULUS: PrecedenceType.P_PRODUCT,
+    TokenType.POW: PrecedenceType.P_EXPONENT,
+    
+    # Episode 8 NEW
+    TokenType.EQ_EQ: PrecedenceType.P_EQUALS,
+    TokenType.NOT_EQ: PrecedenceType.P_EQUALS,
+    TokenType.LT: PrecedenceType.P_LESSGREATER,
+    TokenType.GT: PrecedenceType.P_LESSGREATER,
+    TokenType.LT_EQ: PrecedenceType.P_LESSGREATER,
+    TokenType.GT_EQ: PrecedenceType.P_LESSGREATER,
+
+    # Episode 9 NEW
+    TokenType.LPAREN: PrecedenceType.P_CALL,
 }
 
 class Parser:
     def __init__(self, lexer: Lexer) -> None:
         self.lexer: Lexer = lexer
-
+        
+        # Just a list of errors caught during parsing
         self.errors: list[str] = []
 
         self.current_token: Token = None
         self.peek_token: Token = None
 
         self.prefix_parse_fns: dict[TokenType, Callable] = {
-            TokenType.IDENTUZZ: self.__parse_identifier,
-            TokenType.INTUZZ: self.__parse_int_literal,
-            TokenType.FLOATUZZ: self.__parse_float_literal,
-            TokenType.LPARUZZ: self.__parse_grouped_expression,
-            TokenType.IFUZZ: self.__parse_if_statement,
-            TokenType.TRUZZ: self.__parse_boolean,
-            TokenType.FALUZZ: self.__parse_boolean,
+            TokenType.IDENT: self.__parse_identifier,
+            TokenType.INT: self.__parse_int_literal,
+            TokenType.FLOAT: self.__parse_float_literal,
+            TokenType.LPAREN: self.__parse_grouped_expression,
+
+            # Episode 8 NEW
+            TokenType.IF: self.__parse_if_statement,
+            TokenType.TRUE: self.__parse_boolean,
+            TokenType.FALSE: self.__parse_boolean,
+
+            # Episode 11 NEW
+            TokenType.STRING: self.__parse_string_literal,
         }
         self.infix_parse_fns: dict[TokenType, Callable] = {
-            TokenType.PLUZZ: self.__parse_infix_expression,
-            TokenType.MINUZZ: self.__parse_infix_expression,
-            TokenType.SLUZZ: self.__parse_infix_expression,
-            TokenType.ASTERUZZ: self.__parse_infix_expression,
-            TokenType.POWUZZ: self.__parse_infix_expression,
-            TokenType.MODULUZZ: self.__parse_infix_expression,
-            TokenType.EQUZZ_EQUZZ: self.__parse_infix_expression,
-            TokenType.NEQUZZ: self.__parse_infix_expression,
-            TokenType.LTUZZ: self.__parse_infix_expression,
-            TokenType.GTUZZ: self.__parse_infix_expression,
-            TokenType.LT_EQUZZ: self.__parse_infix_expression,
-            TokenType.GT_EQUZZ: self.__parse_infix_expression,
-            TokenType.LPARUZZ: self.__parse_call_expression,
-        } 
+            TokenType.PLUS: self.__parse_infix_expression,
+            TokenType.MINUS: self.__parse_infix_expression,
+            TokenType.SLASH: self.__parse_infix_expression,
+            TokenType.ASTERISK: self.__parse_infix_expression,
+            TokenType.POW: self.__parse_infix_expression,
+            TokenType.MODULUS: self.__parse_infix_expression,
 
+            # Episode 8 NEW
+            TokenType.EQ_EQ: self.__parse_infix_expression,
+            TokenType.NOT_EQ: self.__parse_infix_expression,
+            TokenType.LT: self.__parse_infix_expression,
+            TokenType.GT: self.__parse_infix_expression,
+            TokenType.LT_EQ: self.__parse_infix_expression,
+            TokenType.GT_EQ: self.__parse_infix_expression,
+
+            # Episode 9 NEW
+            TokenType.LPAREN: self.__parse_call_expression,
+        }
+
+        # Populate the current_token and peek_token
         self.__next_token()
         self.__next_token()
-
-    # region parser helpers
+    
+    # region Parser Helpers
     def __next_token(self) -> None:
+        """ Advances the lexer to retrieve the next token """
         self.current_token = self.peek_token
         self.peek_token = self.lexer.next_token()
 
@@ -85,6 +100,7 @@ class Parser:
         return self.current_token.type == tt
 
     def __peek_token_is(self, tt: TokenType) -> bool:
+        """ Peeks one token ahead and checks the type """
         return self.peek_token.type == tt
     
     def __expect_peek(self, tt: TokenType) -> bool:
@@ -94,7 +110,7 @@ class Parser:
         else:
             self.__peek_error(tt)
             return False
-        
+    
     def __current_precedence(self) -> PrecedenceType:
         prec: int | None = PRECEDENCES.get(self.current_token.type)
         if prec is None:
@@ -106,37 +122,38 @@ class Parser:
         if prec is None:
             return PrecedenceType.P_LOWEST
         return prec
-        
+    
     def __peek_error(self, tt: TokenType) -> None:
-        self.errors.append(f"Expectuzz next tokuzz to be {tt}, but got {self.peek_token.type} instead.")
+        self.errors.append(f"Expected next token to be {tt}, got {self.peek_token.type} instead.")
 
-    def __no_prefix_parse_fn_error(self, tt: TokenType) -> None:
-        self.errors.append(f"No prefuzz parse function for {tt} found.")
-    # endregion Parser
-
+    def __no_prefix_parse_fn_error(self, tt: TokenType):
+        self.errors.append(f"No Prefix Parse Function for {tt} found")
+    # endregion
+    
     def parse_program(self) -> None:
+        """ Main execution entry to the Parser """
         program: Program = Program()
 
-        while self.current_token.type != TokenType.EOFUZZ:
+        while self.current_token.type != TokenType.EOF:
             stmt: Statement = self.__parse_statement()
             if stmt is not None:
                 program.statements.append(stmt)
-
+            
             self.__next_token()
 
         return program
-    
-    # region statement methods
+
+    # region Statament Methods
     def __parse_statement(self) -> Statement:
-        if self.current_token.type == TokenType.IDENTUZZ and self.__peek_token_is(TokenType.EQUZZ):
+        if self.current_token.type == TokenType.IDENT and self.__peek_token_is(TokenType.EQ):
             return self.__parse_assignment_statement()
 
         match self.current_token.type:
-            case TokenType.LETUZZ:
+            case TokenType.LET:
                 return self.__parse_let_statement()
-            case TokenType.FNUZZ:
+            case TokenType.FN:
                 return self.__parse_function_statement()
-            case TokenType.RETURNUZZ:
+            case TokenType.RETURN:
                 return self.__parse_return_statement()
             case _:
                 return self.__parse_expression_statement()
@@ -144,38 +161,39 @@ class Parser:
     def __parse_expression_statement(self) -> ExpressionStatement:
         expr = self.__parse_expression(PrecedenceType.P_LOWEST)
 
-        if self.__peek_token_is(TokenType.SEMICOLUZZ):
+        if self.__peek_token_is(TokenType.SEMICOLON):
             self.__next_token()
 
-        stmt: ExpressionStatement = ExpressionStatement(expr)
+        stmt: ExpressionStatement = ExpressionStatement(expr=expr)
 
         return stmt
     
     def __parse_let_statement(self) -> LetStatement:
-        # let a: int = 10;
         stmt: LetStatement = LetStatement()
 
-        if not self.__expect_peek(TokenType.IDENTUZZ):
+        # let a: int = 10;
+
+        if not self.__expect_peek(TokenType.IDENT):
             return None
         
         stmt.name = IdentifierLiteral(value=self.current_token.literal)
 
-        if not self.__expect_peek(TokenType.COLUZZ):
+        if not self.__expect_peek(TokenType.COLON):
             return None
         
-        if not self.__expect_peek(TokenType.TYPUZZ):
+        if not self.__expect_peek(TokenType.TYPE):
             return None
         
         stmt.value_type = self.current_token.literal
 
-        if not self.__expect_peek(TokenType.EQUZZ):
+        if not self.__expect_peek(TokenType.EQ):
             return None
         
         self.__next_token()
 
         stmt.value = self.__parse_expression(PrecedenceType.P_LOWEST)
 
-        while not self.__current_token_is(TokenType.SEMICOLUZZ) and not self.__current_token_is(TokenType.EOFUZZ):
+        while not self.__current_token_is(TokenType.SEMICOLON) and not self.__current_token_is(TokenType.EOF):
             self.__next_token()
 
         return stmt
@@ -183,25 +201,26 @@ class Parser:
     def __parse_function_statement(self) -> FunctionStatement:
         stmt: FunctionStatement = FunctionStatement()
 
-        if not self.__expect_peek(TokenType.IDENTUZZ):
+        # fn name() -> int { return 10; }
+
+        if not self.__expect_peek(TokenType.IDENT):
             return None
         
         stmt.name = IdentifierLiteral(value=self.current_token.literal)
 
-        if not self.__expect_peek(TokenType.LPARUZZ):
+        if not self.__expect_peek(TokenType.LPAREN):
             return None
         
         stmt.parameters = self.__parse_function_parameters()
-        
-        if not self.__expect_peek(TokenType.ARRUZZ):
+
+        if not self.__expect_peek(TokenType.ARROW):
             return None
         
-        if not self.__expect_peek(TokenType.TYPUZZ):
-            return None
-        
+        self.__next_token()
+
         stmt.return_type = self.current_token.literal
 
-        if not self.__expect_peek(TokenType.LBRACUZZ):
+        if not self.__expect_peek(TokenType.LBRACE):
             return None
         
         stmt.body = self.__parse_block_statement()
@@ -211,7 +230,7 @@ class Parser:
     def __parse_function_parameters(self) -> list[FunctionParameter]:
         params: list[FunctionParameter] = []
 
-        if self.__peek_token_is(TokenType.RPARUZZ):
+        if self.__peek_token_is(TokenType.RPAREN):
             self.__next_token()
             return params
         
@@ -219,7 +238,7 @@ class Parser:
 
         first_param: FunctionParameter = FunctionParameter(name=self.current_token.literal)
 
-        if not self.__expect_peek(TokenType.COLUZZ):
+        if not self.__expect_peek(TokenType.COLON):
             return None
         
         self.__next_token()
@@ -227,24 +246,39 @@ class Parser:
         first_param.value_type = self.current_token.literal
         params.append(first_param)
 
-        while self.__peek_token_is(TokenType.COMMUZZ):
+        while self.__peek_token_is(TokenType.COMMA):
             self.__next_token()
             self.__next_token()
 
             param: FunctionParameter = FunctionParameter(name=self.current_token.literal)
 
-            if not self.__expect_peek(TokenType.COLUZZ):
+            if not self.__expect_peek(TokenType.COLON):
                 return None
             
             self.__next_token()
 
             param.value_type = self.current_token.literal
+
             params.append(param)
 
-        if not self.__expect_peek(TokenType.RPARUZZ):
+        if not self.__expect_peek(TokenType.RPAREN):
             return None
         
         return params
+
+    def __parse_block_statement(self) -> BlockStatement:
+        block_stmt: BlockStatement = BlockStatement()
+
+        self.__next_token()
+
+        while not self.__current_token_is(TokenType.RBRACE) and not self.__current_token_is(TokenType.EOF):
+            stmt: Statement = self.__parse_statement()
+            if stmt is not None:
+                block_stmt.statements.append(stmt)
+
+            self.__next_token()
+
+        return block_stmt
 
     def __parse_return_statement(self) -> ReturnStatement:
         stmt: ReturnStatement = ReturnStatement()
@@ -253,32 +287,18 @@ class Parser:
 
         stmt.return_value = self.__parse_expression(PrecedenceType.P_LOWEST)
 
-        if not self.__expect_peek(TokenType.SEMICOLUZZ):
+        if not self.__expect_peek(TokenType.SEMICOLON):
             return None
         
         return stmt
-
-    def __parse_block_statement(self) -> BlockStatement:
-        block_stmt: BlockStatement = BlockStatement()
-
-        self.__next_token()
-
-        while not self.__current_token_is(TokenType.RBRACUZZ) and not self.__current_token_is(TokenType.EOFUZZ):
-            stmt: Statement = self.__parse_statement()
-            if stmt is not None:
-                block_stmt.statements.append(stmt)
-            
-            self.__next_token()
-
-        return block_stmt
     
     def __parse_assignment_statement(self) -> AssignStatement:
         stmt: AssignStatement = AssignStatement()
 
         stmt.ident = IdentifierLiteral(value=self.current_token.literal)
 
-        self.__next_token() # skips the ident
-        self.__next_token() # skips the =
+        self.__next_token() # skips the 'IDENT'
+        self.__next_token() # skips the '='
 
         stmt.right_value = self.__parse_expression(PrecedenceType.P_LOWEST)
 
@@ -295,23 +315,23 @@ class Parser:
 
         condition = self.__parse_expression(PrecedenceType.P_LOWEST)
 
-        if not self.__expect_peek(TokenType.LBRACUZZ):
+        if not self.__expect_peek(TokenType.LBRACE):
             return None
         
         consequence = self.__parse_block_statement()
 
-        if self.__peek_token_is(TokenType.ELSUZZ):
+        if self.__peek_token_is(TokenType.ELSE):
             self.__next_token()
 
-            if not self.__expect_peek(TokenType.LBRACUZZ):
+            if not self.__expect_peek(TokenType.LBRACE):
                 return None
             
             alternative = self.__parse_block_statement()
 
-        return IfStatement(condition, consequence, alternative)
+        return IfStatement(condition=condition, consequence=consequence, alternative=alternative)
     # endregion
 
-    # region expression methods
+    # region Expression Methods
     def __parse_expression(self, precedence: PrecedenceType) -> Expression:
         prefix_fn: Callable | None = self.prefix_parse_fns.get(self.current_token.type)
         if prefix_fn is None:
@@ -319,7 +339,7 @@ class Parser:
             return None
         
         left_expr: Expression = prefix_fn()
-        while not self.__peek_token_is(TokenType.SEMICOLUZZ) and precedence.value < self.__peek_precedence().value:
+        while not self.__peek_token_is(TokenType.SEMICOLON) and precedence.value < self.__peek_precedence().value:
             infix_fn: Callable | None = self.infix_parse_fns.get(self.peek_token.type)
             if infix_fn is None:
                 return left_expr
@@ -327,10 +347,11 @@ class Parser:
             self.__next_token()
 
             left_expr = infix_fn(left_expr)
-
+        
         return left_expr
-
+    
     def __parse_infix_expression(self, left_node: Expression) -> Expression:
+        """ Parses and returns a normal InfixExpression """
         infix_expr: InfixExpression = InfixExpression(left_node=left_node, operator=self.current_token.literal)
 
         precedence = self.__current_precedence()
@@ -346,15 +367,15 @@ class Parser:
 
         expr: Expression = self.__parse_expression(PrecedenceType.P_LOWEST)
 
-        if not self.__expect_peek(TokenType.RPARUZZ):
+        if not self.__expect_peek(TokenType.RPAREN):
             return None
         
         return expr
     
     def __parse_call_expression(self, function: Expression) -> CallExpression:
         expr: CallExpression = CallExpression(function=function)
-        expr.arguments = self.__parse_expression_list(TokenType.RPARUZZ)
-        
+        expr.arguments = self.__parse_expression_list(TokenType.RPAREN)
+
         return expr
     
     def __parse_expression_list(self, end: TokenType) -> list[Expression]:
@@ -365,10 +386,10 @@ class Parser:
             return e_list
         
         self.__next_token()
-
+        
         e_list.append(self.__parse_expression(PrecedenceType.P_LOWEST))
 
-        while self.__peek_token_is(TokenType.COMMUZZ):
+        while self.__peek_token_is(TokenType.COMMA):
             self.__next_token()
             self.__next_token()
 
@@ -380,34 +401,37 @@ class Parser:
         return e_list
     # endregion
 
-    # region prefix methods
+    # region Prefix Methods
     def __parse_identifier(self) -> IdentifierLiteral:
         return IdentifierLiteral(value=self.current_token.literal)
 
-    def __parse_int_literal(self) -> Expression:
-        """Parses an IntuzzLiteral Noduzz from the current tokuzz."""
+    def __parse_int_literal(self) -> IntegerLiteral:
+        """ Parses an IntegerLiteral Node from the current token """
         int_lit: IntegerLiteral = IntegerLiteral()
 
         try:
             int_lit.value = int(self.current_token.literal)
         except:
-            self.errors.append(f"Could not parse {self.current_token.literal} as intuzz.")
+            self.errors.append(f"Could not parse `{self.current_token.literal}` as an integer.")
             return None
         
         return int_lit
     
-    def __parse_float_literal(self) -> Expression:
-        """Parses a FloatuzzLiteral Noduzz from the current tokuzz."""
+    def __parse_float_literal(self) -> FloatLiteral:
+        """ Parses an FloatLiteral Node from the current token """
         float_lit: FloatLiteral = FloatLiteral()
 
         try:
             float_lit.value = float(self.current_token.literal)
         except:
-            self.errors.append(f"Could not parse {self.current_token.literal} as floatuzz.")
+            self.errors.append(f"Could not parse `{self.current_token.literal}` as an float.")
             return None
         
         return float_lit
     
     def __parse_boolean(self) -> BooleanLiteral:
-        return BooleanLiteral(value=self.__current_token_is(TokenType.TRUZZ))
+        return BooleanLiteral(value=self.__current_token_is(TokenType.TRUE))
+    
+    def __parse_string_literal(self) -> StringLiteral:
+        return StringLiteral(value=self.current_token.literal)
     # endregion
